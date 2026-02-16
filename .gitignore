@@ -7,3 +7,5 @@ venv/
 migrations/
 staticfiles/
 entrprise_service/
+
+README1.md

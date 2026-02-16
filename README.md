@@ -62,7 +62,6 @@ backend/
 │   │   ├── account/          # Custom user model and account endpoints
 │   │   └── auth_app/         # Authentication endpoints (login, token refresh)
 │   ├── notifications/         # SMS and notification services
-│   ├── entrprise_service/    # Enterprise features (organizational structure)
 │   └── shared/                # Shared utilities, exceptions, messages
 │
 ├── manage.py                  # Django management script
@@ -253,26 +252,6 @@ docker-compose down -v
 - `POST /auth/login/` - User login (returns JWT tokens)
 - `POST /auth/token/refresh/` - Refresh access token
 - `POST /auth/logout/` - Logout (blacklist token)
-
-#### Account (`/account/`)
-- `GET /account/me/` - Get current user profile
-- `POST /account/register/` - User registration
-- `PUT /account/profile/` - Update user profile
-- `POST /account/change-password/` - Change password
-
-#### Company (`/company/`)
-- `GET /company/` - List companies
-- `POST /company/` - Create company
-- `GET /company/{id}/` - Retrieve company details
-- `POST /company/{id}/invite/` - Send membership invitation
-- `GET /company/{id}/members/` - List company members
-- `GET /company/{id}/roles/` - List company roles
-
-#### Access Control
-- `GET /access-control/permissions/` - List all permissions
-- `GET /access-control/roles/` - List roles
-- `POST /access-control/roles/` - Create role
-- `POST /access-control/roles/{id}/permissions/` - Assign permissions to role
 
 ### Interactive API Documentation
 Visit `http://localhost:8000/swagger/` for interactive API documentation with request/response examples.
