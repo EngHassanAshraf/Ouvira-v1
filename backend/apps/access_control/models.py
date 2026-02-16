@@ -6,11 +6,11 @@ from django.conf import settings
 from django.utils.translation import gettext_lazy as _
 
 from apps.identity.account.models import CustomUser
-from apps.core.models import TimeStampedModel
+from apps.core.models import TimeStampedModel, SoftDeleteModel
 from apps.company.models import Company
 
 
-class Permission(TimeStampedModel):
+class Permission(TimeStampedModel, SoftDeleteModel):
     code = models.CharField(max_length=100, unique=True)
     module = models.CharField(max_length=100)
     description = models.TextField(blank=True)
@@ -19,7 +19,7 @@ class Permission(TimeStampedModel):
         return self.code
 
 
-class Role(TimeStampedModel):
+class Role(TimeStampedModel, SoftDeleteModel):
     company = models.ForeignKey(
         Company, null=True, blank=True, on_delete=models.CASCADE, related_name="roles"
     )  # Null = System Role
@@ -37,7 +37,7 @@ class Role(TimeStampedModel):
         return f"{self.company} - {self.role}"
 
 
-class RolePermission(TimeStampedModel):
+class RolePermission(TimeStampedModel, SoftDeleteModel):
     role = models.ForeignKey(Role, on_delete=models.CASCADE)
     permission = models.ForeignKey(Permission, on_delete=models.CASCADE)
     granted = models.BooleanField(default=True)
@@ -52,7 +52,7 @@ class RolePermission(TimeStampedModel):
         return f"{self.role} - {self.permission}"
 
 
-class UserCompany(TimeStampedModel):
+class UserCompany(TimeStampedModel, SoftDeleteModel):
     user = models.ForeignKey(
         CustomUser, on_delete=models.CASCADE, related_name="companies"
     )
@@ -74,11 +74,14 @@ class UserCompany(TimeStampedModel):
         return f"{self.user} @ {self.company}"
 
 
-class UserCompanyRole(TimeStampedModel):
+class UserCompanyRole(TimeStampedModel, SoftDeleteModel):
     user_company = models.ForeignKey(
         UserCompany, on_delete=models.CASCADE, related_name="roles"
     )
-    role = models.ForeignKey(Role, on_delete=models.CASCADE)
+    role = models.ForeignKey(
+        Role,
+        on_delete=models.CASCADE,
+    )
     assigned_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
