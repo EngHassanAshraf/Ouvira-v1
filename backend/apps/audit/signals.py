@@ -3,7 +3,7 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.contrib.auth import get_user_model
 
-from identity.account.models.user import RoleChangeLog
+# from identity.account.models.user import RoleChangeLog
 from .models import ActivityLog
 from .services.activity_service import log_user_action
 from .services.notification_servic import create_notification
@@ -59,15 +59,15 @@ def log_signup(sender, instance, created, **kwargs):
 
 
 # Role change
-@receiver(post_save, sender=RoleChangeLog)
-def notify_role_change(sender, instance, created, **kwargs):
-    if created:
-        log_user_action(
-            user=instance.user,
-            action_type=ActivityLog.ActionTypes.ROLE_CHANGED,
-            description=f"{instance.old_role} -> {instance.new_role}",
-        )
-        create_notification(
-            user=instance.user,
-            message=f"Sizning rolingiz {instance.old_role} dan {instance.new_role} ga o'zgardi.",
-        )
+# @receiver(post_save, sender=RoleChangeLog)
+# def notify_role_change(sender, instance, created, **kwargs):
+#     if created:
+#         log_user_action(
+#             user=instance.user,
+#             action_type=ActivityLog.ActionTypes.ROLE_CHANGED,
+#             description=f"{instance.old_role} -> {instance.new_role}",
+#         )
+#         create_notification(
+#             user=instance.user,
+#             message=f"Sizning rolingiz {instance.old_role} dan {instance.new_role} ga o'zgardi.",
+#         )

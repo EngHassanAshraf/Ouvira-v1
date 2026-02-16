@@ -1,7 +1,7 @@
 # user_activity/admin.py
 from django.contrib import admin
 from .models import ActivityLog, Notification, DateDim, SecurityAuditLog
-from apps.identity.account.models.user import RoleChangeLog
+# from apps.identity.account.models.user import RoleChangeLog
 
 admin.site.register(DateDim)
 admin.site.register(SecurityAuditLog)
@@ -31,8 +31,8 @@ class NotificationAdmin(admin.ModelAdmin):
     search_fields = ("user__username", "message")
 
 
-@admin.register(RoleChangeLog)
-class RoleChangeLogAdmin(admin.ModelAdmin):
-    list_display = ("user", "old_role", "new_role", "changed_by", "timestamp")
-    list_filter = ("old_role", "new_role", "timestamp")
-    search_fields = ("user__username", "changed_by__username")
+# @admin.register(RoleChangeLog)
+# class RoleChangeLogAdmin(admin.ModelAdmin):
+#     list_display = ("user", "old_role", "new_role", "changed_by", "timestamp")
+#     list_filter = ("old_role", "new_role", "timestamp")
+#     search_fields = ("user__username", "changed_by__username")
