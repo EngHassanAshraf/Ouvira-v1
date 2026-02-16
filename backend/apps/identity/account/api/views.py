@@ -4,7 +4,6 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework.permissions import IsAuthenticated
-from ..services import RoleService
 
 
 class ChangeUserRoleView(APIView):
@@ -13,20 +12,7 @@ class ChangeUserRoleView(APIView):
     def post(self, request, user_id):
         new_role = request.data.get("role")
 
-        if not new_role:
-            return Response({"error": "role field is mandatory"}, status=400)
-
-        try:
-            user = RoleService.change_user_role(request.user, user_id, new_role)
-        except PermissionDenied as e:
-            return Response({"error": str(e)}, status=403)
-        except ValueError as e:
-            return Response({"error": str(e)}, status=400)
-
-        return Response(
-            {"msg": f"{user.username}, Role {user.user_role}, ga o'zgartirildi"},
-            status=200,
-        )
+        pass
 
 
 class SessionTestAPIView(APIView):

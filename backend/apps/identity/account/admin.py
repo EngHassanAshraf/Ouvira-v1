@@ -9,12 +9,11 @@ class CustomUserAdmin(UserAdmin):
         "username",
         "full_name",
         "primary_mobile",
-        "user_role",
         "is_staff",
         "is_active",
     )
 
-    list_filter = ("user_role", "is_staff", "is_active")
+    list_filter = ("is_staff", "is_active")
     readonly_fields = ("account_uid", "last_login", "date_joined")
     fieldsets = (
         (

@@ -13,31 +13,18 @@ from django.contrib.auth.models import (
 
 from ..manager import UserManager
 
-from apps.core.models import TimeStampedModel
+from apps.core.models import TimeStampedModel, SoftDeleteModel
 
 
-class CustomUser(AbstractUser, TimeStampedModel):
+class CustomUser(AbstractUser, TimeStampedModel, SoftDeleteModel):
     full_name = models.CharField(max_length=255)
     primary_mobile = models.CharField(max_length=15, unique=True)
-
-    user_role = models.CharField(
-        max_length=20,
-        choices=[
-            ("account_owner", "Account Owner"),
-            ("admin", "Admin"),
-            ("manager", "Manager"),
-            ("employee", "Employee"),
-        ],
-        default="employee",
-    )
 
     objects: "UserManager" = UserManager()
 
     email_verified = models.BooleanField(default=False)
     phone_verified = models.BooleanField(default=False)
     account_uid = models.CharField(max_length=20, unique=True, blank=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
 
     is_2fa_enabled = models.BooleanField(default=False)
     two_fa_secret = models.CharField(max_length=255, null=True, blank=True)
@@ -96,21 +83,20 @@ class TwoALoginSession(models.Model):
         verbose_name = "Two ALogin Session"
         verbose_name_plural = "Two ALogin Sessions"
 
+# class RoleChangeLog(models.Model):
+#     user = models.ForeignKey(
+#         CustomUser, on_delete=models.CASCADE, related_name="role_changes"
+#     )
+#     old_role = models.CharField(max_length=20)
+#     new_role = models.CharField(max_length=20)
+#     changed_by = models.ForeignKey(
+#         CustomUser, on_delete=models.SET_NULL, null=True, related_name="changed_roles"
+#     )
+#     timestamp = models.DateTimeField(auto_now_add=True)
 
-class RoleChangeLog(models.Model):
-    user = models.ForeignKey(
-        CustomUser, on_delete=models.CASCADE, related_name="role_changes"
-    )
-    old_role = models.CharField(max_length=20)
-    new_role = models.CharField(max_length=20)
-    changed_by = models.ForeignKey(
-        CustomUser, on_delete=models.SET_NULL, null=True, related_name="changed_roles"
-    )
-    timestamp = models.DateTimeField(auto_now_add=True)
+#     def __str__(self):
+#         return f"{self.user.username}: {self.old_role} {self.new_role}"
 
-    def __str__(self):
-        return f"{self.user.username}: {self.old_role} {self.new_role}"
-
-    class Meta:
-        verbose_name = "Role Change Log"
-        verbose_name_plural = "Role Change Logs"
+#     class Meta:
+#         verbose_name = "Role Change Log"
+#         verbose_name_plural = "Role Change Logs"
