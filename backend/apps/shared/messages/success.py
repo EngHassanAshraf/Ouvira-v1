@@ -1,0 +1,16 @@
+SUCCESS_MESSAGES = {
+    "ACCOUNT_CREATED": "Your account has been created successfully.",
+    "ACCOUNT_COMPLETED": "Your account has been completed successfully.",
+    "ASSIGNED_AS_OWNER": "You have been assigned the role of Account Owner.",
+    "MOBILE_VALIDATED": "Mobile number verified successfully.",
+    "PHONE_OTP_SENT": "Verification code sent to your mobile number.",
+    "EMAIL_OTP_SENT": "Verification code sent to your email address.",
+    "VERIFICATION_ACCEPTED": "Verification successful.",
+    "FIRST_TIME_LOGIN_INVITE": "Welcome! You have successfully joined the invited company account.",
+    "PASSWORD_RESET_REQUIRED": "Please reset your password to continue.",
+    "REMEMBER_ME_ENABLED": "You will stay signed in on this device.",
+    "PASSWORD_RESET_SUCCESS": "Your password has been reset successfully.",
+    "PASSWORD_STRENGTH_CONFIRMED": "Your password is strong and secure.",
+    "LOGGED_OUT": "You have logged out successfully.",
+    "LOGIN_SUCCESS": "Login successful.",
+}
