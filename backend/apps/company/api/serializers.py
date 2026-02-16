@@ -7,11 +7,12 @@ class CompanySerializer(ModelSerializer):
         model = Company
         fields = [
             "name",
-            "description",
             "logo",
+            "create_by",
+            "parent_company",
+            "description",
             "address",
             "status",
-            "create_by",
         ]
 
 

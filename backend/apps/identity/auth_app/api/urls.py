@@ -19,7 +19,7 @@ urlpatterns = [
     path("resent-otp/", ResentOTPView.as_view(), name="resent-otp"),
     path("login/", LoginView.as_view(), name="login"),
     path("logout/", LogouteView.as_view(), name="logoute"),
-    path("tokenrefresh/", RefreshTokenView.as_view(), name="token_refresh"),
+    path("token/refresh/", RefreshTokenView.as_view(), name="token-refresh"),
     path(
         "login-2fa-verify-backup/",
         TwoFAVerifyBackupView.as_view(),

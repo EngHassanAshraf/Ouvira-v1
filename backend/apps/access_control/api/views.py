@@ -11,8 +11,8 @@ from rest_framework.status import (
     HTTP_404_NOT_FOUND,
 )
 
-from .models import Role
-from apps.company.models import Company
+from apps.access_control.models import Role
+from ..models import Company
 from .serializers import RoleSerializer
 
 
@@ -31,7 +31,7 @@ class RoleListView(ListAPIView):
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self) -> QuerySet:
-        return Role.objects.filter(company=self.request.user.company)
+        return Role.objects.filter(company=self.request.user)
 
     def get(self, request):
         roles = Role.objects.all()

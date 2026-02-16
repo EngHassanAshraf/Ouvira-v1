@@ -8,8 +8,8 @@ from rest_framework import serializers
 
 from apps.identity.account.models.user import CustomUser
 
-from .utils import validate_user_email, validate_user_password, validate_user_mobile
-from .utilits import verify_turnstile
+from ..utils import validate_user_email, validate_user_password, validate_user_mobile
+from ..utilits import verify_turnstile
 
 
 class BaseUserInputSerializer(serializers.Serializer):

@@ -18,7 +18,7 @@ from rest_framework.exceptions import ValidationError
 from rest_framework.throttling import ScopedRateThrottle
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from .models import OTP, LoginActivity
+from ..models import OTP, LoginActivity
 from .serializers import (
     Enable2FASerializer,
     SignupSerializer,
@@ -36,7 +36,7 @@ from apps.shared.exceptions import BusinessException
 from apps.shared.messages.error import ERROR_MESSAGES
 from apps.shared.messages.success import SUCCESS_MESSAGES
 
-from .utilits import verify_turnstile
+from ..utilits import verify_turnstile
 
 
 MAX_ATTEMPTS = 3

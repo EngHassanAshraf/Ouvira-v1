@@ -1,5 +1,5 @@
 from datetime import timedelta
-
+from typing import TYPE_CHECKING
 from uuid import uuid4
 import uuid
 
@@ -11,7 +11,8 @@ from django.contrib.auth.models import (
     PermissionsMixin,
 )
 
-from apps.identity.account.manager import UserManager
+from ..manager import UserManager
+
 from apps.core.models import TimeStampedModel
 
 
@@ -30,7 +31,7 @@ class CustomUser(AbstractUser, TimeStampedModel):
         default="employee",
     )
 
-    objects = UserManager()
+    objects: "UserManager" = UserManager()
 
     email_verified = models.BooleanField(default=False)
     phone_verified = models.BooleanField(default=False)

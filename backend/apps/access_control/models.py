@@ -53,8 +53,10 @@ class RolePermission(TimeStampedModel):
 
 
 class UserCompany(TimeStampedModel):
-    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
-    company = models.ForeignKey(Company, on_delete=models.CASCADE)
+    user = models.ForeignKey(
+        CustomUser, on_delete=models.CASCADE, related_name="companies"
+    )
+    company = models.ForeignKey(Company, on_delete=models.CASCADE, related_name="users")
 
     is_primary_company = models.BooleanField(default=False)
     joined_at = models.DateTimeField(auto_now_add=True)

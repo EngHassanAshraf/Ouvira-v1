@@ -15,10 +15,10 @@ schema_view = get_schema_view(
 )
 
 urlpatterns = [
-    path("auth/", include("apps.identity.auth_app.urls")),
-    path("account/", include("apps.identity.account.urls")),
+    path("api/auth/", include("apps.identity.auth_app.api.urls")),
+    path("api/account/", include("apps.identity.account.api.urls")),
     # path("company/", include("apps.entrprise_service.company.urls")),
-    path("company/", include("apps.company.urls")),
+    path("api/company/", include("apps.company.api.urls")),
     path("admin/", admin.site.urls),
     re_path(
         r"^swagger(?P<format>\.json|\.yaml)$",

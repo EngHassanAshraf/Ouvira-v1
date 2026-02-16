@@ -3,7 +3,7 @@ from rest_framework.generics import CreateAPIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
-from .models import Company, CompanySettings
+from apps.company.models import Company, CompanySettings
 from .serializers import CompanySerializer, CompanySettingsSerializer
 
 
