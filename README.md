@@ -80,7 +80,7 @@ Each app follows: **Models → Services → Serializers → Views → URLs**
 
 ### Prerequisites
 - Docker & Docker Compose
-- Python 3.12+ (for local dev without Docker)
+- Python 3.10+ (for local dev without Docker)
 
 ### 1. Environment
 
