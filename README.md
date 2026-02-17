@@ -1,310 +1,241 @@
-# Ouvira - Multi-Tenant Backend API
+# Ouvira — Multi-Tenant Backend API
 
-A comprehensive multi-tenant Django backend application providing authentication, authorization, company management, and audit logging capabilities. Built with Django REST Framework and designed for secure, scalable enterprise applications.
-
-## Table of Contents
-- [Overview](#overview)
-- [Tech Stack](#tech-stack)
-- [Project Structure](#project-structure)
-- [Core Features](#core-features)
-- [Authentication & Authorization](#authentication--authorization)
-- [Setup & Installation](#setup--installation)
-- [Running the Application](#running-the-application)
-- [API Documentation](#api-documentation)
-- [Environment Configuration](#environment-configuration)
-
-## Overview
-
-Ouvira is a production-ready multi-tenant backend service that supports:
-- **Multi-tenancy**: Isolated tenant environments with shared infrastructure
-- **Role-Based Access Control (RBAC)**: Granular permission management per tenant
-- **Company Management**: User and company hierarchy with invitations and memberships
-- **Audit Logging**: Comprehensive activity and security audit trails
-- **JWT Authentication**: Secure token-based API access
-
-### Key Concepts
-- **Tenants**: Isolated application instances with separate data
-- **Companies**: Organizations within tenants with parent-subsidiary relationships
-- **Roles & Permissions**: Fine-grained access control at the company level
-- **Audit Trails**: Complete tracking of user activities and security events
+A multi-tenant Django backend providing authentication, RBAC, company management, and audit logging. Built with Django REST Framework and designed for secure, scalable enterprise applications.
 
 ## Tech Stack
 
-- **Framework**: Django 5.2.9 with Django REST Framework 3.16.1
-- **Authentication**: JWT (djangorestframework-simplejwt 5.5.1)
-- **Database**: PostgreSQL 15
-- **Caching**: Redis (Alpine)
-- **API Documentation**: Swagger/OpenAPI (drf-yasg)
-- **Containerization**: Docker & Docker Compose
-- **Python**: 3.10
-- **Other**: Twilio SMS integration, Cloudflare Turnstile CAPTCHA support
+| Component | Technology |
+|-----------|-----------|
+| Framework | Django 5.2.9 + DRF 3.16.1 |
+| Auth | JWT (simplejwt) + OTP (pyotp) + 2FA |
+| Database | PostgreSQL 15 |
+| Cache | Redis |
+| Multi-tenancy | django-tenants (schema isolation) |
+| API Docs | Swagger / ReDoc (drf-yasg) |
+| Container | Docker & Docker Compose |
+| Python | 3.10 |
+| Integrations | Twilio SMS, Cloudflare Turnstile |
 
-## Project Structure
+## Architecture
 
 ```
 backend/
-├── config/                     # Django configuration & settings
+├── config/                         # Configuration
 │   ├── settings/
-│   │   ├── base.py           # Base configuration (shared)
-│   │   ├── local.py          # Local development settings
-│   │   └── production.py      # Production settings
-│   ├── urls.py               # Main URL routing
-│   ├── asgi.py               # ASGI application
-│   └── wsgi.py               # WSGI application
+│   │   ├── base.py                # Shared settings
+│   │   ├── local.py               # Dev (DEBUG, CORS open)
+│   │   └── production.py          # Prod (SSL, HSTS, CORS whitelist)
+│   ├── urls.py                    # Root URL routing
+│   ├── asgi.py / wsgi.py          # Entry points (DJANGO_ENV-based)
 │
-├── apps/                       # Core application modules
-│   ├── access_control/        # RBAC: Roles, permissions, role-permission mapping
-│   ├── audit/                 # Activity logging & security audit trails
-│   ├── company/               # Company management, invitations, memberships
-│   ├── core/                  # Base models, utilities, common functionality
-│   ├── tenant/                # Multi-tenancy configuration & middleware
-│   ├── identity/              # User authentication & account management
-│   │   ├── account/          # Custom user model and account endpoints
-│   │   └── auth_app/         # Authentication endpoints (login, token refresh)
-│   ├── notifications/         # SMS and notification services
-│   └── shared/                # Shared utilities, exceptions, messages
+├── apps/
+│   ├── access_control/            # RBAC: roles, permissions, invitations
+│   │   ├── models/                # Permission, Role, RolePermission, UserCompany, etc.
+│   │   ├── services/              # Service layer (business logic)
+│   │   ├── api/                   # Serializers, views, URLs
+│   │   └── permissions.py
+│   │
+│   ├── audit/                     # Activity logs, security logs, notifications
+│   │   ├── models/
+│   │   ├── services/              # NotificationService, ActivityLogService, SecurityAuditLogService
+│   │   ├── api/
+│   │   └── signals.py
+│   │
+│   ├── company/                   # Company CRUD, settings, hierarchy
+│   │   ├── models/
+│   │   ├── services/              # CompanyService, CompanySettingsService
+│   │   ├── api/
+│   │   └── permissions.py         # IsCompanyOwner, IsCompanyAdmin
+│   │
+│   ├── identity/
+│   │   ├── account/               # User model, profile, user listing
+│   │   │   ├── models/
+│   │   │   ├── services/          # AccountService
+│   │   │   └── api/
+│   │   └── auth_app/              # Signup, login, OTP, 2FA, tokens
+│   │       ├── services/          # AuthService, OTPService, TwoFAService, TokenService
+│   │       └── api/
+│   │
+│   ├── tenant/                    # Multi-tenancy middleware & models
+│   ├── core/                      # Base models, utilities
+│   └── shared/                    # Shared exceptions, messages
 │
-├── manage.py                  # Django management script
-└── requirements.txt           # Python dependencies
+├── manage.py                      # DJANGO_ENV-based settings selection
+└── requirements.txt
 ```
 
-## Core Features
+### Layered Architecture
 
-### 1. Access Control (`apps/access_control/`)
-- **Permission Management**: Define granular permissions (e.g., user.create, user.edit, role.read)
-- **Role Management**: Create custom roles per company or system-wide roles
-- **Role-Permission Mapping**: Assign permissions to roles with grant/deny logic
-- **Module-Based Organization**: Permissions organized by module for better management
+```
+Request → Middleware (Tenant) → View → Service Layer → Model
+                                  ↓
+                             Serializer (validation)
+                                  ↓
+                             Permission (RBAC)
+```
 
-### 2. Audit & Security (`apps/audit/`)
-- **Activity Logging**: Track user actions (create, read, update, delete)
-- **Security Audit Trails**: Monitor sensitive operations and access patterns
-- **Activity Services**: Notification and logging services for compliance
-- **Date Dimension**: Historical date tracking for trend analysis
-
-### 3. Company Management (`apps/company/`)
-- **Company Hierarchy**: Support for parent and subsidiary companies
-- **Company Settings**: Configuration per company
-- **Invitations & Memberships**: User invitations and company membership tracking
-- **Company Status**: Active, deactivated, or deleted states
-
-### 4. Multi-Tenancy (`apps/tenant/`)
-- **Tenant Isolation**: Separate data storage per tenant
-- **Tenant Middleware**: Automatic tenant detection and routing
-- **Domain Management**: Map custom domains to tenants
-- **Schema Separation**: Each tenant has isolated database schema
-
-### 5. Identity & Authentication (`apps/identity/`)
-- **Custom User Model**: Extended user model with company and tenant association
-- **JWT Authentication**: Secure token-based API authentication
-- **Account Management**: User profile, password reset, account settings
-- **Admin Interface**: Django admin integration for user management
-
-### 6. Notifications (`apps/notifications/`)
-- **SMS Integration**: Twilio-based SMS notifications
-- **Notification Services**: Extensible notification system
-
-## Authentication & Authorization
-
-### Authentication Type
-- **JWT (JSON Web Tokens)**
-- **Header Format**: `Authorization: Bearer <ACCESS_TOKEN>`
-
-### Authentication Flow
-1. User logs in via `/auth/` endpoint with credentials
-2. Backend issues JWT access and refresh tokens
-3. Client includes access token in request headers
-4. Backend validates token signature and expiration
-5. Expired tokens can be refreshed using refresh token
-
-### Authorization
-- **Role-Based Access Control (RBAC)**: Users assigned to roles within companies
-- **Permission Checks**: API endpoints enforce specific permissions based on user's role
-- **Company Isolation**: Users can only access data within their company (tenant-level)
-
-### API Access Rules
-- **Open Endpoints**: Authentication endpoints (login, signup)
-- **Protected Endpoints**: All sensitive operations require valid JWT token
-- **API Gateway**: Kong (production) enforces additional access control rules
-
-📚 **Detailed documentation**:
-- Kong API Gateway rules: [docs/kong-notes.md](docs/kong-notes.md)
-- API authentication flow: [docs/API.md](docs/API.md)
+Each app follows: **Models → Services → Serializers → Views → URLs**
 
 ## Setup & Installation
 
 ### Prerequisites
 - Docker & Docker Compose
-- Python 3.10+ (for local development)
-- PostgreSQL 15 (included in Docker)
-- Redis (included in Docker)
+- Python 3.12+ (for local dev without Docker)
 
-### Environment Configuration
-
-Create a `.env` file in the workspace root:
-
-```env
-# Database Configuration
-POSTGRES_DB=ouvira_db
-POSTGRES_USER=postgres
-POSTGRES_PASSWORD=your_secure_password
-
-# Django Configuration
-DEBUG=True
-SECRET_KEY=your-django-secret-key
-TEST_MODE=False
-
-# Tenants
-TENANT_BASE_DOMAIN=localhost:8000
-
-# Twilio (Optional - for SMS)
-TWILIO_ACCOUNT_SID=your_twilio_sid
-TWILIO_AUTH_TOKEN=your_twilio_token
-TWILIO_PHONE_NUMBER=+1234567890
-
-# Cloudflare Turnstile (Optional - for CAPTCHA)
-TURNSTILE_SITE_KEY=your_turnstile_site_key
-TURNSTILE_SECRET_KEY=your_turnstile_secret_key
-```
-
-### Local Setup (Without Docker)
-
-1. **Create virtual environment**:
-   ```bash
-   python -m venv venv
-   source venv/bin/activate  # On Windows: venv\Scripts\activate
-   ```
-
-2. **Install dependencies**:
-   ```bash
-   cd backend
-   pip install -r requirements.txt
-   ```
-
-3. **Configure database** (PostgreSQL must be running):
-   ```bash
-   python manage.py migrate
-   ```
-
-4. **Create superuser**:
-   ```bash
-   python manage.py createsuperuser
-   ```
-
-5. **Run development server**:
-   ```bash
-   python manage.py runserver
-   ```
-
-## Running the Application
-
-### Using Docker Compose (Recommended)
-
-1. **Build and start all services**:
-   ```bash
-   docker-compose up --build
-   ```
-
-2. **Run migrations**:
-   ```bash
-   docker-compose exec backend python manage.py migrate
-   ```
-
-3. **Create superuser**:
-   ```bash
-   docker-compose exec backend python manage.py createsuperuser
-   ```
-
-4. **Access the application**:
-   - Backend API: `http://localhost:8000`
-   - Swagger UI: `http://localhost:8000/swagger/`
-   - Django Admin: `http://localhost:8000/admin/`
-
-### Docker Services
-- **backend**: Django REST API (port 8000)
-- **db**: PostgreSQL 15 database
-- **redis**: Redis cache server
-
-### Useful Commands
+### 1. Environment
 
 ```bash
-# View logs
-docker-compose logs -f backend
-
-# Run management commands
-docker-compose exec backend python manage.py <command>
-
-# Access Django shell
-docker-compose exec backend python manage.py shell
-
-# Stop all services
-docker-compose down
-
-# Remove all data (including database)
-docker-compose down -v
+cp .env.example .env
+# Edit .env with your values
 ```
 
-## API Documentation
-
-### Endpoints Overview
-
-#### Authentication (`/auth/`)
-- `POST /auth/login/` - User login (returns JWT tokens)
-- `POST /auth/token/refresh/` - Refresh access token
-- `POST /auth/logout/` - Logout (blacklist token)
-
-### Interactive API Documentation
-Visit `http://localhost:8000/swagger/` for interactive API documentation with request/response examples.
-
-## Environment Configuration
-
-Key settings can be configured via environment variables or Django settings:
+Key variables:
 
 | Variable | Purpose | Default |
 |----------|---------|---------|
-| `DEBUG` | Debug mode (development only) | False |
-| `SECRET_KEY` | Django secret key | Required |
-| `TENANT_BASE_DOMAIN` | Base domain for tenant routing | localhost:8000 |
-| `POSTGRES_DB` | Database name | ouvira_db |
-| `TWILIO_ACCOUNT_SID` | Twilio account ID | - |
+| `DJANGO_ENV` | Settings module (`local` or `production`) | `local` |
+| `SECRET_KEY` | Django secret key | **Required** |
+| `DEBUG` | Debug mode | `False` |
+| `ALLOWED_HOSTS` | Comma-separated hosts | `localhost` |
+| `TENANT_BASE_DOMAIN` | Base domain for tenant routing | `localhost` |
+| `POSTGRES_DB` | Database name | `ouvira_db` |
+| `CORS_ALLOWED_ORIGINS` | Production CORS whitelist | — |
+| `CSRF_TRUSTED_ORIGINS` | Production CSRF origins | — |
 
-For sensitive settings, use environment variables instead of hardcoding in settings files.
+### 2. Docker (Recommended)
 
-## Development Workflow
+```bash
+docker compose up --build -d
+docker compose exec backend python manage.py createsuperuser
+```
 
-1. **Create feature branch**: `git checkout -b feature/feature-name`
-2. **Make changes**: Edit code following Django best practices
-3. **Run migrations**: If models changed, create and apply migrations
-4. **Test changes**: Run test suite and manually test endpoints
-5. **Commit changes**: `git commit -m "descriptive message"`
-6. **Push and create PR**: `git push origin feature/feature-name`
+Services:
+- **Backend API**: `http://localhost:8000`
+- **Swagger UI**: `http://localhost:8000/swagger/`
+- **ReDoc**: `http://localhost:8000/redoc/`
+- **Admin**: `http://localhost:8000/admin/`
 
-## Architecture Notes
+### 3. Local (Without Docker)
 
-### Multi-Tenancy Implementation
-- Built on `django-tenants` package for schema isolation
-- Each tenant has separate database schema
-- Middleware automatically routes requests to correct tenant
-- Shared tables (users signup, payments) remain unseparated
+```bash
+python -m venv venv
+source venv/bin/activate        # Windows: venv\Scripts\activate
+cd backend
+pip install -r requirements.txt
+python manage.py migrate
+python manage.py runserver
+```
 
-### Security Considerations
-- JWT tokens stored in HTTP-only cookies (or mobile app storage)
-- Password hashing using Django's PBKDF2 algorithm
-- CORS headers configured for secure cross-origin requests
-- Additional API Gateway (Kong) security layer in production
+## API Endpoints
+
+All authenticated endpoints require `Authorization: Bearer <token>` and `X-Tenant: <subdomain>` headers.
+
+### Authentication — `api/auth/`
+
+| Method | Endpoint | Auth | Description |
+|--------|----------|------|-------------|
+| POST | `/api/auth/signup/` | None | Start signup (sends OTP) |
+| POST | `/api/auth/verify-otp/` | None | Verify OTP code |
+| POST | `/api/auth/resent-otp/` | None | Resend OTP |
+| POST | `/api/auth/finalize-signin/` | None | Complete signup (email + password) |
+| POST | `/api/auth/login/` | None | Login (email or phone) |
+| POST | `/api/auth/logout/` | Bearer | Logout (blacklist token) |
+| POST | `/api/auth/token/refresh/` | None | Refresh access token |
+| POST | `/api/auth/settings_enable-2fa/` | Bearer | Enable 2FA (TOTP) |
+| POST | `/api/auth/login-2fa-verify-code/` | None | Verify 2FA code |
+| POST | `/api/auth/login-2fa-verify-backup/` | None | Verify 2FA backup code |
+
+### Access Control — `api/access-control/`
+
+| Method | Endpoint | Auth |
+|--------|----------|------|
+| GET, POST | `/api/access-control/permissions/` | Admin |
+| GET, PUT, PATCH, DELETE | `/api/access-control/permissions/{id}/` | Admin |
+| GET, POST | `/api/access-control/roles/` | Admin |
+| GET, PUT, PATCH, DELETE | `/api/access-control/roles/{id}/` | Admin |
+| GET, POST | `/api/access-control/role-permissions/` | Admin |
+| GET, DELETE | `/api/access-control/role-permissions/{id}/` | Admin |
+| GET, POST | `/api/access-control/user-companies/` | Admin |
+| GET, PUT, DELETE | `/api/access-control/user-companies/{id}/` | Admin |
+| GET, POST | `/api/access-control/user-company-roles/` | Admin |
+| GET, DELETE | `/api/access-control/user-company-roles/{id}/` | Admin |
+| GET, POST | `/api/access-control/invitations/` | Admin |
+| GET, PUT, DELETE | `/api/access-control/invitations/{id}/` | Admin |
+| POST | `/api/access-control/invitations/accept/` | Bearer |
+| POST | `/api/access-control/invitations/{id}/revoke/` | Admin |
+| POST | `/api/access-control/invitations/{id}/resend/` | Admin |
+
+### Company — `api/company/`
+
+| Method | Endpoint | Auth |
+|--------|----------|------|
+| GET, POST | `/api/company/` | Bearer |
+| GET, PUT, PATCH | `/api/company/{id}/` | Bearer / Admin |
+| DELETE | `/api/company/{id}/` | Owner |
+| GET, PUT, PATCH | `/api/company/{id}/settings/` | Bearer / Admin |
+
+### Account — `api/account/`
+
+| Method | Endpoint | Auth |
+|--------|----------|------|
+| GET, PUT, PATCH | `/api/account/profile/` | Bearer |
+| GET | `/api/account/users/` | Admin |
+| GET | `/api/account/session-tests/` | Bearer |
+
+### Audit — `api/audit/`
+
+| Method | Endpoint | Auth |
+|--------|----------|------|
+| GET | `/api/audit/notifications/` | Bearer |
+| POST | `/api/audit/notifications/mark-read/` | Bearer |
+| GET | `/api/audit/activity-logs/` | Admin |
+| GET | `/api/audit/activity-logs/my/` | Bearer |
+| GET | `/api/audit/security-logs/` | Bearer |
+
+### Rate Limits
+
+| Scope | Limit |
+|-------|-------|
+| Anonymous | 200/day |
+| Authenticated | 1000/day |
+| Login | 5/min |
+| OTP/2FA | 3–5/hour |
+| Token Refresh | 20/min |
+
+## Settings Modes
+
+| Setting | Local (`DJANGO_ENV=local`) | Production (`DJANGO_ENV=production`) |
+|---------|---------------------------|--------------------------------------|
+| `DEBUG` | `True` | `False` |
+| `ALLOWED_HOSTS` | `["*"]` | From env var |
+| `CORS` | Allow all origins | Whitelist only |
+| `SSL` | Off | Enforced (HSTS 1yr) |
+| `SECRET_KEY` | Any | Validated (rejects insecure) |
+| `Email` | Console backend | Production backend |
+
+## Useful Commands
+
+```bash
+# Logs
+docker compose logs -f backend
+
+# Django shell
+docker compose exec backend python manage.py shell
+
+# System check
+docker compose exec backend python manage.py check
+
+# Stop services
+docker compose down
+
+# Reset (delete all data)
+docker compose down -v
+```
 
 ## Contributing
 
-When adding new features:
-1. Create new app in `backend/apps/` if feature is distinct
-2. Follow Django conventions (models.py, serializers.py, views.py, urls.py)
+1. Create feature branch: `git checkout -b feature/feature-name`
+2. Follow the layered architecture: Models → Services → Serializers → Views → URLs
 3. Add audit logging for sensitive operations
-4. Include migrations for database changes
+4. Include migrations for model changes
 5. Update API documentation
-
-## Support & Documentation
-
-- **Kong Configuration**: [docs/kong-notes.md](docs/kong-notes.md)
-- **API Details**: [docs/API.md](docs/API.md)
-- **Django Admin**: `/admin/` (superuser required)
-- **API Swagger**: `/swagger/`

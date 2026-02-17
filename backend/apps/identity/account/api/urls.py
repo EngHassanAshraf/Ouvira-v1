@@ -1,12 +1,8 @@
 from django.urls import path
-from .views import ChangeUserRoleView, SessionTestAPIView
-
+from .views import UserProfileView, UserListView, SessionTestAPIView
 
 urlpatterns = [
-    path(
-        "user/<int:user_id>/change-role/",
-        ChangeUserRoleView.as_view(),
-        name="change_user_role",
-    ),
+    path("profile/", UserProfileView.as_view(), name="user-profile"),
+    path("users/", UserListView.as_view(), name="user-list"),
     path("session-tests/", SessionTestAPIView.as_view(), name="session-tests"),
 ]

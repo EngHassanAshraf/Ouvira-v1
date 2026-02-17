@@ -1,8 +1,9 @@
 from django.urls import path
 
-from .views import CompanyCreateView, CompanySettingsAddView
+from .views import CompanyListCreateView, CompanyDetailView, CompanySettingsView
 
 urlpatterns = [
-    path("", CompanyCreateView.as_view(), name="create-company"),
-    path("settings/", CompanySettingsAddView.as_view(), name="company-settings"),
+    path("", CompanyListCreateView.as_view(), name="company-list-create"),
+    path("<int:pk>/", CompanyDetailView.as_view(), name="company-detail"),
+    path("<int:pk>/settings/", CompanySettingsView.as_view(), name="company-settings"),
 ]

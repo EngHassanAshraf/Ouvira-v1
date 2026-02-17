@@ -1,4 +1,13 @@
-from .base import *
+"""
+Local development settings.
+"""
+from .base import *  # noqa: F401,F403
+
+DEBUG = True
+
+ALLOWED_HOSTS = ["*"]
+
+CORS_ALLOW_ALL_ORIGINS = True
 
 DATABASES = {
     "default": {
@@ -11,7 +20,10 @@ DATABASES = {
     }
 }
 
+# Dev-only email backend — prints to console
+EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 
+# Security off for local dev
 SECURE_SSL_REDIRECT = False
 SESSION_COOKIE_SECURE = False
 CSRF_COOKIE_SECURE = False

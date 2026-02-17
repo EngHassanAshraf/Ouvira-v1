@@ -1,21 +1,55 @@
+"""
+Account views — user profile management and admin user listing.
+"""
 import datetime
-from rest_framework.exceptions import PermissionDenied
-from rest_framework.response import Response
+from rest_framework.generics import RetrieveUpdateAPIView, ListAPIView
 from rest_framework.views import APIView
-from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+from rest_framework_simplejwt.authentication import JWTAuthentication
+
+from ..services import AccountService
+from .serializers import UserProfileSerializer, UserUpdateSerializer, UserListSerializer
+from apps.access_control.permissions.IsAdminUser import IsAdminUser
 
 
-class ChangeUserRoleView(APIView):
+class UserProfileView(RetrieveUpdateAPIView):
+    """
+    GET   /profile/ → retrieve authenticated user's profile
+    PUT   /profile/ → update profile
+    PATCH /profile/ → partial update
+    """
     permission_classes = [IsAuthenticated]
 
-    def post(self, request, user_id):
-        new_role = request.data.get("role")
+    def get_serializer_class(self):
+        if self.request.method in ("PUT", "PATCH"):
+            return UserUpdateSerializer
+        return UserProfileSerializer
 
-        pass
+    def get_object(self):
+        return AccountService.get_profile(self.request.user)
+
+    def perform_update(self, serializer):
+        AccountService.update_profile(self.request.user, **serializer.validated_data)
+
+
+class UserListView(ListAPIView):
+    """
+    GET /users/ → list users (admin only)
+    Supports ?company=<id> query param to filter by company.
+    """
+    serializer_class = UserListSerializer
+    permission_classes = [IsAuthenticated, IsAdminUser]
+
+    def get_queryset(self):
+        company_id = self.request.query_params.get("company")
+        return AccountService.list_users(
+            company_id=int(company_id) if company_id else None,
+        )
 
 
 class SessionTestAPIView(APIView):
+    """Session/token inspection endpoint for debugging."""
     permission_classes = [IsAuthenticated]
     authentication_classes = [JWTAuthentication]
 
@@ -24,7 +58,7 @@ class SessionTestAPIView(APIView):
         token = request.auth
 
         if hasattr(token, "payload"):
-            exp_timestamp = token.payload.get("exp")  # integer
+            exp_timestamp = token.payload.get("exp")
         else:
             exp_timestamp = None
 

@@ -37,7 +37,7 @@ class CustomUserAdmin(UserAdmin):
                 )
             },
         ),
-        ("Permissions", {"fields": ("user_role", "is_staff", "is_active")}),
+        ("Permissions", {"fields": ("is_staff", "is_active")}),
         ("Important dates", {"fields": ("last_login", "date_joined")}),
     )
     add_fieldsets = (
@@ -51,7 +51,6 @@ class CustomUserAdmin(UserAdmin):
                     "primary_mobile",
                     "password1",
                     "password2",
-                    "user_role",
                     "is_staff",
                     "is_active",
                 ),

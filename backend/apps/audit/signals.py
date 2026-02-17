@@ -1,18 +1,23 @@
+"""
+Audit signals — log login/logout/signup events.
+
+NOTE: The current ActivityLog model requires company + date FK,
+so we only use NotificationService for signals that don't have
+a company context. Activity logging should be done at the view/service
+layer where company context is available.
+"""
 from django.contrib.auth.signals import user_logged_in, user_logged_out
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.contrib.auth import get_user_model
 
-# from identity.account.models.user import RoleChangeLog
-from .models import ActivityLog
-from .services.activity_service import log_user_action
-from .services.notification_servic import create_notification
+from .services.notification_service import NotificationService
 
 User = get_user_model()
 
 
-# Helper function
 def get_client_ip(request):
+    """Extract client IP from request."""
     x_forwarded_for = request.META.get("HTTP_X_FORWARDED_FOR")
     if x_forwarded_for:
         ip = x_forwarded_for.split(",")[0]
@@ -21,53 +26,25 @@ def get_client_ip(request):
     return ip
 
 
-# Login
 @receiver(user_logged_in)
 def log_login(sender, request, user, **kwargs):
-    ip = get_client_ip(request)
-    user_agent = request.META.get("HTTP_USER_AGENT", "")
-    log_user_action(
-        user=user,
-        action_type=ActivityLog.ActionTypes.LOGIN_SUCCESS,
-        ip_address=ip,
-        device=user_agent,
-    )
+    """Log successful login activity."""
+    # Activity logging requires company context — handled at view layer.
+    # Signal only used for notification use cases if needed.
+    pass
 
 
-# Logout
 @receiver(user_logged_out)
 def log_logout(sender, request, user, **kwargs):
-    ip = get_client_ip(request)
-    user_agent = request.META.get("HTTP_USER_AGENT", "")
-    log_user_action(
-        user=user,
-        action_type=ActivityLog.ActionTypes.LOGOUT,
-        ip_address=ip,
-        device=user_agent,
-    )
+    """Log logout activity."""
+    pass
 
 
-# Signup
 @receiver(post_save, sender=User)
 def log_signup(sender, instance, created, **kwargs):
+    """Notify new users upon signup."""
     if created:
-        log_user_action(user=instance, action_type=ActivityLog.ActionTypes.SIGNUP)
-        create_notification(
+        NotificationService.create_notification(
             user=instance,
-            message="Xush kelibsiz! Siz muvaffaqiyatli ro'yxatdan o'tdingiz.",
+            message="Welcome! You have successfully registered.",
         )
-
-
-# Role change
-# @receiver(post_save, sender=RoleChangeLog)
-# def notify_role_change(sender, instance, created, **kwargs):
-#     if created:
-#         log_user_action(
-#             user=instance.user,
-#             action_type=ActivityLog.ActionTypes.ROLE_CHANGED,
-#             description=f"{instance.old_role} -> {instance.new_role}",
-#         )
-#         create_notification(
-#             user=instance.user,
-#             message=f"Sizning rolingiz {instance.old_role} dan {instance.new_role} ga o'zgardi.",
-#         )

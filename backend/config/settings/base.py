@@ -6,16 +6,19 @@ from datetime import timedelta
 load_dotenv()
 
 
+# === EXTERNAL SERVICE KEYS ===
+
 TWILIO_ACCOUNT_SID = os.getenv("TWILIO_ACCOUNT_SID")
 TWILIO_AUTH_TOKEN = os.getenv("TWILIO_AUTH_TOKEN")
 TWILIO_PHONE_NUMBER = os.getenv("TWILIO_PHONE_NUMBER")
 
+TURNSTILE_SITE_KEY = os.getenv("TURNSTILE_SITE_KEY")
+TURNSTILE_SECRET_KEY = os.getenv("TURNSTILE_SECRET_KEY")
+
+
+# === CORE SETTINGS ===
 
 BASE_DIR = Path(__file__).resolve().parent.parent
-
-TURNSTILE_SITE_KEY = os.getenv("TURNSTILE_SITE_KEY")
-
-TURNSTILE_SECRET_KEY = os.getenv("TURNSTILE_SECRET_KEY")
 
 SECRET_KEY = os.getenv("SECRET_KEY")
 
@@ -23,8 +26,10 @@ DEBUG = os.getenv("DEBUG", "False") == "True"
 
 TEST_MODE = os.getenv("TEST_MODE", "False") == "True"
 
+ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "").split(",")
 
-# Application definition
+
+# === APPLICATION DEFINITION ===
 
 DEFAULT_APPS = (
     "django.contrib.admin",
@@ -46,10 +51,8 @@ TENANT_CREATED_APPS = (
     "apps.audit",
     "apps.access_control",
     "apps.company",
-    # "apps.entrprise_service.organization",
     "apps.identity.auth_app",
 )
-
 
 TENANT_THIRD_PARTY = (
     "drf_yasg",
@@ -58,15 +61,19 @@ TENANT_THIRD_PARTY = (
     "rest_framework_simplejwt.token_blacklist",
 )
 
-
 TENANT_APPS = [*TENANT_THIRD_PARTY, *TENANT_CREATED_APPS]
-
 
 INSTALLED_APPS = [app for app in TENANT_APPS if app not in SHARED_APPS] + list(
     SHARED_APPS
 )
 
+
+# === AUTH ===
+
 AUTH_USER_MODEL = "account.CustomUser"
+
+
+# === MULTI-TENANCY ===
 
 TENANT_MODEL = "tenant.Tenant"
 TENANT_DOMAIN_MODEL = "tenant.Domain"
@@ -74,11 +81,16 @@ TENANT_BASE_DOMAIN = os.getenv("TENANT_BASE_DOMAIN", "")
 
 DATABASE_ROUTERS = ("django_tenants.routers.TenantSyncRouter",)
 
+
+# === REST FRAMEWORK ===
+
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": (
         "rest_framework_simplejwt.authentication.JWTAuthentication",
     ),
     "DEFAULT_PERMISSION_CLASSES": ("rest_framework.permissions.IsAuthenticated",),
+    "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
+    "PAGE_SIZE": 20,
     "DEFAULT_THROTTLE_CLASSES": [
         "rest_framework.throttling.AnonRateThrottle",
         "rest_framework.throttling.UserRateThrottle",
@@ -106,9 +118,15 @@ SIMPLE_JWT = {
     "BLACKLIST_AFTER_ROTATION": True,
 }
 
+
+# === SESSION ===
+
 SESSION_COOKIE_AGE = 30 * 60
 SESSION_EXPIRE_AT_BROWSER_CLOSE = False
 SESSION_SAVE_EVERY_REQUEST = False
+
+
+# === MIDDLEWARE ===
 
 MIDDLEWARE = [
     "apps.tenant.middleware.HeaderTenantMainMiddleware",
@@ -122,9 +140,15 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
+
+# === URL CONFIG ===
+
 ROOT_URLCONF = "config.urls"
 
 APPEND_SLASH = os.getenv("DJANGO_APPEND_SLASH", "True") == "True"
+
+
+# === TEMPLATES ===
 
 TEMPLATES = [
     {
@@ -143,34 +167,33 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "config.wsgi.application"
 
-CORS_ALLOW_ALL_ORIGINS = DEBUG
+
+# === SWAGGER ===
 
 SWAGGER_SETTINGS = {
-    "USE_SESSION_AUTH": True,  # JWT ishlatamiz, session auth kerak emas
+    "USE_SESSION_AUTH": False,
     "SECURITY_DEFINITIONS": {
         "Bearer": {
             "type": "apiKey",
             "name": "Authorization",
             "in": "header",
-            "description": "JWT token kiriting: Bearer <token>",
+            "description": "JWT token: Bearer <token>",
         }
     },
 }
 
+
+# === PASSWORD VALIDATION ===
+
 AUTH_PASSWORD_VALIDATORS = [
-    {
-        "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",
-    },
-    {
-        "NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",
-    },
-    {
-        "NAME": "django.contrib.auth.password_validation.CommonPasswordValidator",
-    },
-    {
-        "NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",
-    },
+    {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},
+    {"NAME": "django.contrib.auth.password_validation.MinimumLengthValidator"},
+    {"NAME": "django.contrib.auth.password_validation.CommonPasswordValidator"},
+    {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator"},
 ]
+
+
+# === I18N ===
 
 LANGUAGE_CODE = "en-us"
 
@@ -180,6 +203,48 @@ USE_I18N = True
 
 USE_TZ = True
 
+
+# === STATIC ===
+
 STATIC_URL = "static/"
 
+
+# === DEFAULT PK ===
+
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+
+# === LOGGING ===
+
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "formatters": {
+        "verbose": {
+            "format": "[{asctime}] {levelname} {name} {message}",
+            "style": "{",
+        },
+    },
+    "handlers": {
+        "console": {
+            "class": "logging.StreamHandler",
+            "formatter": "verbose",
+        },
+    },
+    "root": {
+        "handlers": ["console"],
+        "level": "INFO",
+    },
+    "loggers": {
+        "django": {
+            "handlers": ["console"],
+            "level": "WARNING",
+            "propagate": False,
+        },
+        "apps": {
+            "handlers": ["console"],
+            "level": "INFO",
+            "propagate": False,
+        },
+    },
+}

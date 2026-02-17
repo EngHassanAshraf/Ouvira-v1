@@ -2,14 +2,13 @@
 """Django's command-line utility for administrative tasks."""
 import os
 import sys
-from config.settings import base
 
 
 def main():
-    if base.DEBUG:
-        os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings.local")
-    else:
-        os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings.production")
+    django_env = os.getenv("DJANGO_ENV", "local")
+    os.environ.setdefault(
+        "DJANGO_SETTINGS_MODULE", f"config.settings.{django_env}"
+    )
     try:
         from django.core.management import execute_from_command_line
     except ImportError as exc:
