@@ -3,6 +3,10 @@ from django.urls import path, include, re_path
 from drf_yasg import openapi
 from drf_yasg.views import get_schema_view
 from rest_framework.permissions import AllowAny
+from django.http import JsonResponse
+
+def health_check(request):
+    return JsonResponse({"status": "ok"})
 
 schema_view = get_schema_view(
     openapi.Info(
@@ -15,6 +19,7 @@ schema_view = get_schema_view(
 )
 
 urlpatterns = [
+    path("", health_check),
     path("api/access-control/", include("apps.access_control.api.urls")),
     path("api/auth/", include("apps.identity.auth_app.api.urls")),
     path("api/account/", include("apps.identity.account.api.urls")),
