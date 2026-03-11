@@ -1,0 +1,18 @@
+[build]
+builder = "nixpacks"
+buildCommand = "pip install -r requirements.txt"
+
+[deploy]
+startCommand = "cd backend && python manage.py makemigrations tenant && python manage.py migrate && python manage.py migrate_schemas --shared && gunicorn config.wsgi:application --config gunicorn.conf.py"
+healthcheckPath = ""
+
+
+
+
+
+
+
+
+
+
+

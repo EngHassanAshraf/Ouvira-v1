@@ -54,6 +54,7 @@ class PermissionListCreateView(ListCreateAPIView):
     GET  /permissions/ → list all permissions (any authenticated user)
     POST /permissions/ → create a new permission (admin only)
     """
+
     permission_classes = [IsAuthenticated]
 
     def get_serializer_class(self):
@@ -77,6 +78,7 @@ class PermissionDetailView(RetrieveUpdateDestroyAPIView):
     PATCH  /permissions/<pk>/ → partial update (admin only)
     DELETE /permissions/<pk>/ → soft delete (admin only)
     """
+
     serializer_class = PermissionSerializer
     permission_classes = [IsAuthenticated]
 
@@ -99,6 +101,7 @@ class RoleListCreateView(ListCreateAPIView):
     GET  /roles/ → list roles for user's companies
     POST /roles/ → create a new role (admin only)
     """
+
     permission_classes = [IsAuthenticated]
 
     def get_serializer_class(self):
@@ -148,6 +151,7 @@ class RoleDetailView(RetrieveUpdateDestroyAPIView):
     PATCH  /roles/<pk>/ → partial update (admin only)
     DELETE /roles/<pk>/ → soft delete (admin only)
     """
+
     serializer_class = RoleSerializer
     permission_classes = [IsAuthenticated]
 
@@ -191,6 +195,7 @@ class RolePermissionListCreateView(ListCreateAPIView):
     GET  /role-permissions/ → list role permissions
     POST /role-permissions/ → assign permission to role (admin only)
     """
+
     serializer_class = RolePermissionSerializer
     permission_classes = [IsAuthenticated]
 
@@ -213,7 +218,9 @@ class RolePermissionListCreateView(ListCreateAPIView):
         role = serializer.validated_data.get("role")
         if role and role.company:
             company_id = role.company.id
-            if not request.data.get("company") and not request.query_params.get("company"):
+            if not request.data.get("company") and not request.query_params.get(
+                "company"
+            ):
                 request.data["company"] = company_id
 
         self.perform_create(serializer)
@@ -228,6 +235,7 @@ class RolePermissionDetailView(RetrieveUpdateDestroyAPIView):
     PATCH  /role-permissions/<pk>/ → partial update (admin only)
     DELETE /role-permissions/<pk>/ → remove permission from role (admin only)
     """
+
     serializer_class = RolePermissionSerializer
     permission_classes = [IsAuthenticated]
 
@@ -250,6 +258,7 @@ class UserCompanyListCreateView(ListCreateAPIView):
     GET  /user-companies/ → list user-company associations
     POST /user-companies/ → associate user with company (admin only)
     """
+
     serializer_class = UserCompanySerializer
     permission_classes = [IsAuthenticated]
 
@@ -299,6 +308,7 @@ class UserCompanyDetailView(RetrieveUpdateDestroyAPIView):
     PATCH  /user-companies/<pk>/ → partial update (admin only)
     DELETE /user-companies/<pk>/ → remove user from company (admin only)
     """
+
     serializer_class = UserCompanySerializer
     permission_classes = [IsAuthenticated]
 
@@ -324,6 +334,7 @@ class UserCompanyRoleListCreateView(ListCreateAPIView):
     GET  /user-company-roles/ → list user-company-role assignments
     POST /user-company-roles/ → assign role to user-company (admin only)
     """
+
     serializer_class = UserCompanyRoleSerializer
     permission_classes = [IsAuthenticated]
 
@@ -349,7 +360,9 @@ class UserCompanyRoleListCreateView(ListCreateAPIView):
         user_company = serializer.validated_data.get("user_company")
         if user_company and user_company.company:
             company_id = user_company.company.id
-            if not request.data.get("company") and not request.query_params.get("company"):
+            if not request.data.get("company") and not request.query_params.get(
+                "company"
+            ):
                 request.data["company"] = company_id
 
         self.perform_create(serializer)
@@ -364,6 +377,7 @@ class UserCompanyRoleDetailView(RetrieveUpdateDestroyAPIView):
     PATCH  /user-company-roles/<pk>/ → partial update (admin only)
     DELETE /user-company-roles/<pk>/ → remove role (admin only)
     """
+
     serializer_class = UserCompanyRoleSerializer
     permission_classes = [IsAuthenticated]
 
@@ -386,6 +400,7 @@ class InvitationListCreateView(ListCreateAPIView):
     GET  /invitations/ → list invitations
     POST /invitations/ → create invitation (admin only)
     """
+
     permission_classes = [IsAuthenticated]
 
     def get_serializer_class(self):
@@ -447,6 +462,7 @@ class InvitationDetailView(RetrieveUpdateDestroyAPIView):
     PATCH  /invitations/<pk>/ → partial update (admin only)
     DELETE /invitations/<pk>/ → delete (admin only)
     """
+
     serializer_class = InvitationSerializer
     permission_classes = [IsAuthenticated]
 
@@ -461,6 +477,7 @@ class InvitationDetailView(RetrieveUpdateDestroyAPIView):
 
 class InvitationAcceptView(APIView):
     """Accept an invitation by token"""
+
     permission_classes = []
 
     def post(self, request):
@@ -506,6 +523,7 @@ class InvitationAcceptView(APIView):
 
 class InvitationRevokeView(APIView):
     """Revoke an invitation (Admin only)"""
+
     permission_classes = [IsAuthenticated, IsAdminUser]
 
     def post(self, request, pk):
@@ -518,7 +536,13 @@ class InvitationRevokeView(APIView):
             )
 
         company_id = request.data.get("company") or request.query_params.get("company")
-        if not company_id or invitation.company.id != int(company_id):
+        if not company_id:
+            return Response(
+                {"detail": "Company is required."},
+                status=HTTP_400_BAD_REQUEST,
+            )
+
+        if invitation.company.id != int(company_id):
             return Response(
                 {"detail": "You don't have permission to revoke this invitation."},
                 status=HTTP_403_FORBIDDEN,
@@ -539,6 +563,7 @@ class InvitationRevokeView(APIView):
 
 class InvitationResendView(APIView):
     """Resend an invitation (Admin only)"""
+
     permission_classes = [IsAuthenticated, IsAdminUser]
 
     def post(self, request, pk):

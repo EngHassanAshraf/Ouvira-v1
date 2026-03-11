@@ -16,10 +16,10 @@ class UserManager(BaseUserManager):
         return user
 
     def create_user_with_role(self, **extra_fields):
-        if self.model.objects.count() == 0:
-            extra_fields["user_role"] = "account_owner"
-        else:
-            extra_fields.setdefault("user_role", "employee")
+        # if self.model.objects.count() == 0:
+        #     extra_fields["user_role"] = "account_owner"
+        # else:
+        #     extra_fields.setdefault("user_role", "employee")
 
         password = extra_fields.pop("password", None)
         username = extra_fields.get("username")
@@ -30,7 +30,7 @@ class UserManager(BaseUserManager):
         extra_fields.setdefault("is_staff", True)
         extra_fields.setdefault("is_superuser", True)
         extra_fields.setdefault("is_active", True)
-        extra_fields.setdefault("user_role", "admin")
+        # extra_fields.setdefault("user_role", "admin")
 
         if extra_fields.get("is_staff") is not True:
             raise ValueError("Superuser must have is_staff=True")
