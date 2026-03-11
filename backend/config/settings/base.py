@@ -52,6 +52,7 @@ TENANT_CREATED_APPS = (
     "apps.access_control",
     "apps.company",
     "apps.identity.auth_app",
+    "apps.hris",
 )
 
 TENANT_THIRD_PARTY = (
