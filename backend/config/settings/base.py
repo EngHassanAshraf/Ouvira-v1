@@ -5,15 +5,6 @@ from datetime import timedelta
 
 load_dotenv()
 
-
-# === EXTERNAL SERVICE KEYS ===
-
-TWILIO_ACCOUNT_SID = os.getenv("TWILIO_ACCOUNT_SID")
-TWILIO_AUTH_TOKEN = os.getenv("TWILIO_AUTH_TOKEN")
-TWILIO_PHONE_NUMBER = os.getenv("TWILIO_PHONE_NUMBER")
-
-TURNSTILE_SITE_KEY = os.getenv("TURNSTILE_SITE_KEY")
-TURNSTILE_SECRET_KEY = os.getenv("TURNSTILE_SECRET_KEY")
 FRONTEND_URL = os.getenv("FRONTEND_URL", "http://localhost:3000")
 
 
