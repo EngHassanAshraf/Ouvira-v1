@@ -260,12 +260,15 @@ TURNSTILE_SITE_KEY = os.getenv("TURNSTILE_SITE_KEY")
 TURNSTILE_SECRET_KEY = os.getenv("TURNSTILE_SECRET_KEY")
 
 # === SEND EMAIL ===
+# === SEND EMAIL ===
 EMAIL_BACKEND = os.getenv("EMAIL_BACKEND", "django.core.mail.backends.smtp.EmailBackend")
-EMAIL_HOST = os.getenv("EMAIL_HOST", "smtp.gmail.com") # Use the SMTP server of your provider
-EMAIL_PORT = os.getenv("EMAIL_PORT", 587)
-EMAIL_USE_TLS = os.getenv("EMAIL_USE_TLS", True)
-EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER")  # Your email address
-EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD") # Use an app password, not your main password
-DEFAULT_FROM_EMAIL = os.getenv("DEFAULT_FROM_EMAIL") # Default sender if from_email is not specified
+EMAIL_HOST = os.getenv("EMAIL_HOST", "smtp.gmail.com")
+EMAIL_PORT = int(os.getenv("EMAIL_PORT", 587))  # int() qo'shildi
+EMAIL_USE_TLS = os.getenv("EMAIL_USE_TLS", "True") == "True"  # Boolean tekshiruvi
+EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER")
+EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD")
+DEFAULT_FROM_EMAIL = os.getenv("DEFAULT_FROM_EMAIL")
+
+
 
 

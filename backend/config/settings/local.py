@@ -21,7 +21,7 @@ DATABASES = {
 }
 
 # Dev-only email backend — prints to console
-EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+# EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 
 # Security off for local dev
 SECURE_SSL_REDIRECT = False
