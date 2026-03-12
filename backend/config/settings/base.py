@@ -5,17 +5,6 @@ from datetime import timedelta
 
 load_dotenv()
 
-
-# === EXTERNAL SERVICE KEYS ===
-
-TWILIO_ACCOUNT_SID = os.getenv("TWILIO_ACCOUNT_SID")
-TWILIO_AUTH_TOKEN = os.getenv("TWILIO_AUTH_TOKEN")
-TWILIO_PHONE_NUMBER = os.getenv("TWILIO_PHONE_NUMBER")
-
-TURNSTILE_SITE_KEY = os.getenv("TURNSTILE_SITE_KEY")
-TURNSTILE_SECRET_KEY = os.getenv("TURNSTILE_SECRET_KEY")
-
-
 # === CORE SETTINGS ===
 
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -249,3 +238,30 @@ LOGGING = {
         },
     },
 }
+
+
+# === EXTERNAL SERVICE KEYS ===
+
+# === SEND SMS ===
+TWILIO_ACCOUNT_SID = os.getenv("TWILIO_ACCOUNT_SID")
+TWILIO_AUTH_TOKEN = os.getenv("TWILIO_AUTH_TOKEN")
+TWILIO_PHONE_NUMBER = os.getenv("TWILIO_PHONE_NUMBER")
+
+VONAGE_KEY = os.getenv("VONAGE_KEY")
+VONAGE_API_SECRET = os.getenv("VONAGE_API_SECRET")
+
+
+# === TURNSTILE ===
+TURNSTILE_SITE_KEY = os.getenv("TURNSTILE_SITE_KEY")
+TURNSTILE_SECRET_KEY = os.getenv("TURNSTILE_SECRET_KEY")
+
+# === SEND EMAIL ===
+EMAIL_BACKEND = os.getenv("EMAIL_BACKEND", "django.core.mail.backends.smtp.EmailBackend")
+EMAIL_HOST = os.getenv("EMAIL_HOST", "smtp.gmail.com") # Use the SMTP server of your provider
+EMAIL_PORT = os.getenv("EMAIL_PORT", 587)
+EMAIL_USE_TLS = os.getenv("EMAIL_USE_TLS", True)
+EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER")  # Your email address
+EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD") # Use an app password, not your main password
+DEFAULT_FROM_EMAIL = os.getenv("DEFAULT_FROM_EMAIL") # Default sender if from_email is not specified
+
+

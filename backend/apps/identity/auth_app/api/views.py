@@ -2,13 +2,16 @@
 Optimized authentication views using service layer
 """
 import logging
+
 from django.conf import settings
 from django.db import IntegrityError, DatabaseError
+
 from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.throttling import ScopedRateThrottle
+
 from drf_yasg.utils import swagger_auto_schema
 
 from .serializers import (
@@ -35,6 +38,7 @@ from apps.identity.account.services import UserService
 from apps.shared.exceptions import BusinessException
 from apps.shared.messages.error import ERROR_MESSAGES
 from apps.shared.messages.success import SUCCESS_MESSAGES
+from apps.notifications.sms import send_sms
 
 logger = logging.getLogger(__name__)
 
@@ -55,6 +59,7 @@ class SignUPView(APIView):
         phone_number = serializer.validated_data.get("primary_mobile")
         full_name = serializer.validated_data.get("full_name")
 
+
         try:
             # Create or get user
             user, created = AuthService.signup_user(phone_number, full_name)
@@ -62,9 +67,8 @@ class SignUPView(APIView):
             # Generate and send OTP
             otp = OTPService.create_otp(phone_number)
             
-            # TODO: Send SMS in production
-            # send_sms(phone_number, f"Your OTP code is {otp.otp_code}")
-            
+            # Send SMS
+            send_sms(message=f"Your OTP code is {otp.otp_code}", phone=phone_number)
             return Response(
                 {
                     "status": "success",
