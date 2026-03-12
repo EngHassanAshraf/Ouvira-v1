@@ -5,11 +5,12 @@ import logging
 import secrets
 from django.utils import timezone
 from django.db.models import QuerySet
-
+from apps.shared.services.email_service import send_email
 from ..models import Invitation, UserCompany, UserCompanyRole
 from apps.identity.account.models import CustomUser
 from apps.company.models import Company
 from apps.shared.exceptions import BusinessException
+from django.conf import settings
 
 logger = logging.getLogger(__name__)
 
@@ -119,6 +120,18 @@ class InvitationService:
         )
         
         logger.info(f"Invitation created for {email} to company {company.name}")
+
+        # send invitation email
+        invite_link = f"{settings.FRONTEND_URL}/invite/{token}"
+
+        try:
+            send_email(
+                subject="You're invited to join a company",
+                message=f"You have been invited to join {company.name}. Click the link: {invite_link}",
+                recipient_email=email
+            )
+        except Exception as e:
+            logger.error(f"Failed to send invitation email to {email}: {e}")
         return invitation
 
     @staticmethod

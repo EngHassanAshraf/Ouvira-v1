@@ -5,6 +5,10 @@ from datetime import timedelta
 
 load_dotenv()
 
+
+FRONTEND_URL = os.getenv("FRONTEND_URL", "http://localhost:3000")
+
+
 # === CORE SETTINGS ===
 
 BASE_DIR = Path(__file__).resolve().parent.parent
