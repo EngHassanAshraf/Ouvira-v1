@@ -45,7 +45,16 @@ TENANT_CREATED_APPS = (
     "apps.access_control",
     "apps.company",
     "apps.identity.auth_app",
-    "apps.hris",
+
+    # hris/modules
+    "apps.hris.core",
+    'apps.hris.leave_management',
+    'apps.hris.recruitment',
+    'apps.hris.travel_management',
+    'apps.hris.expense_management',
+    'apps.hris.performance',
+    'apps.hris.termination',
+    'apps.hris.analytics',
 )
 
 TENANT_THIRD_PARTY = (
